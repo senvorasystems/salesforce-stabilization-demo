@@ -30,6 +30,10 @@ node_modules/
 # Eslint cache
 .eslintcache
 
+# Salesforce Code Analyzer local results
+.ci-results/
+sfca-results*.json
+
 # MacOS system files
 .DS_Store
 
