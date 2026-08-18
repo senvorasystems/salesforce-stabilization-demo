@@ -1,0 +1,62 @@
+name: Salesforce CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  quality:
+    name: LWC Tests and Code Quality
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run LWC Jest tests
+        run: npm run test:unit -- --runInBand
+
+      - name: Install Salesforce CLI
+        run: npm install --global @salesforce/cli@latest
+
+      - name: Install Code Analyzer
+        run: echo y | sf plugins install code-analyzer@latest
+
+      - name: Run Salesforce Code Analyzer
+        id: code-analyzer
+        uses: forcedotcom/run-code-analyzer@v2
+        with:
+          run-arguments: >-
+            --workspace force-app
+            --view detail
+            --output-file sfca-results.json
+          results-artifact-name: salesforce-code-analyzer-results
+
+      - name: Fail on critical or high severity violations
+        if: |
+          steps.code-analyzer.outputs.exit-code > 0 ||
+          steps.code-analyzer.outputs.num-sev1-violations > 0 ||
+          steps.code-analyzer.outputs.num-sev2-violations > 0
+        run: exit 1
