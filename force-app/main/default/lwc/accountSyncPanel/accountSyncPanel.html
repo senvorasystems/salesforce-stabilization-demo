@@ -1,0 +1,36 @@
+<template>
+  <lightning-card
+    title="External Account Synchronization"
+    icon-name="standard:account"
+  >
+    <div class="slds-p-around_medium">
+      <p class="slds-m-bottom_medium">
+        Queue this Account for asynchronous synchronization with the external
+        integration service.
+      </p>
+
+      <lightning-button
+        label="Synchronize Account"
+        variant="brand"
+        onclick={handleSync}
+        disabled={isLoading}
+      >
+      </lightning-button>
+
+      <template lwc:if={isLoading}>
+        <lightning-spinner
+          alternative-text="Queuing synchronization"
+          size="small"
+        >
+        </lightning-spinner>
+      </template>
+
+      <template lwc:if={jobId}>
+        <div class="slds-m-top_medium">
+          <strong>Queued Job:</strong>
+          <p>{jobId}</p>
+        </div>
+      </template>
+    </div>
+  </lightning-card>
+</template>
