@@ -44,10 +44,12 @@ AccountSyncQueueable
 ExternalAccountService
         |
         v
-Named Credential
+Named Credential reference
+External_Account_API
         |
         v
-External API
+Environment-specific external endpoint
+(not configured by this repository)
 ```
 
 ## Responsibilities
@@ -76,21 +78,27 @@ Integration service responsible for:
 
 - Constructing the outbound request
 - Serializing Salesforce data
-- Using a Named Credential endpoint
+- Using the expected Named Credential reference
 - Processing the external response
 - Handling unsuccessful HTTP responses
 
 ## Integration Design
 
-The external endpoint is referenced using a Salesforce Named Credential pattern:
+The Apex source uses the Salesforce Named Credential pattern:
 
 ```text
 callout:External_Account_API/accounts
 ```
 
-Credentials and endpoint configuration are therefore separated from Apex source code.
+`External_Account_API` is the Named Credential reference expected by the implementation. This demonstrates separation of endpoint and authentication configuration from Apex code; the repository does not provision or guarantee the Named Credential or its external endpoint.
 
 The repository does not contain authentication secrets, tokens, production credentials, or external system credentials.
+
+## Runtime Configuration
+
+Deploying the source code alone is not sufficient for a live callout. Each target Salesforce environment must separately configure the expected Named Credential and authentication, and provide a compatible external endpoint.
+
+The current reference/demo environment does not claim a configured live external Account API. Without the required runtime configuration, the controller can enqueue the asynchronous job and the job can start, but the external callout will fail. Successful end-to-end external synchronization is therefore not presented as a verified capability of this repository.
 
 ## Asynchronous Processing
 
@@ -106,9 +114,9 @@ This separates the user interaction from the external callout and provides a cle
 
 ### Apex
 
-The Apex test suite currently validates:
+Using deterministic `HttpCalloutMock` responses, the Apex test suite currently validates:
 
-- Successful external synchronization
+- Successful callout-handling behavior for a mocked external response
 - External server errors
 - Invalid unsaved records
 - Queueable execution
@@ -124,7 +132,7 @@ Failed:    0
 Pass Rate: 100%
 ```
 
-HTTP integrations are isolated using `HttpCalloutMock`.
+HTTP callout behavior is isolated using `HttpCalloutMock`; these tests do not verify a live external integration.
 
 ### Lightning Web Components
 
@@ -285,7 +293,7 @@ External communication is isolated from the UI and asynchronous orchestration la
 
 ### Named Credentials
 
-Integration configuration is kept outside source code.
+The source code references `External_Account_API`; each target environment must provide the corresponding endpoint and authentication configuration separately.
 
 ### Queueable Apex
 
@@ -301,7 +309,7 @@ Formatting, linting, testing, and static analysis are part of the development wo
 
 ## Scope
 
-This repository is intentionally small. It is a demonstration of engineering patterns rather than a complete production integration platform.
+This repository is intentionally small. It is a reference implementation demonstrating maintainable Salesforce integration architecture and engineering practices, not a production integration platform.
 
 A production implementation could additionally require areas such as:
 
