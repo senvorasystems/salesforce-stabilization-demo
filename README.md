@@ -59,7 +59,7 @@ Environment-specific external endpoint
 Lightning Web Component responsible for the user interaction. It:
 
 - Receives the current Account record ID
-- Starts the synchronization process
+- Submits the synchronization request
 - Displays a loading state
 - Reports successful queueing
 - Handles Apex errors
@@ -70,7 +70,7 @@ Thin Apex controller exposed to Lightning. It validates the Account ID and deleg
 
 ### `AccountSyncQueueable`
 
-Queueable Apex implementation responsible for executing the synchronization asynchronously and allowing HTTP callouts.
+Queueable Apex implementation responsible for starting the outbound processing asynchronously and allowing HTTP callouts.
 
 ### `ExternalAccountService`
 
@@ -102,13 +102,13 @@ The current reference/demo environment does not claim a configured live external
 
 ## Asynchronous Processing
 
-External synchronization is executed using:
+The outbound callout workflow is queued using:
 
 ```apex
 Queueable, Database.AllowsCallouts
 ```
 
-This separates the user interaction from the external callout and provides a cleaner foundation for integrations that may later require additional retry, monitoring, or orchestration mechanisms.
+This separates the user interaction from the external callout. Retry, monitoring, and orchestration mechanisms are not implemented by this reference project.
 
 ## Testing
 
@@ -138,9 +138,9 @@ HTTP callout behavior is isolated using `HttpCalloutMock`; these tests do not ve
 
 The LWC Jest suite validates:
 
-- Synchronization of the current Account
+- Submission of the current Account record ID
 - Asynchronous loading state
-- Successful Queueable job display
+- Successful queueing confirmation
 - Apex error handling
 
 Current verified result:
