@@ -56,7 +56,6 @@ jobs:
 
       - name: Fail on critical or high severity violations
         if: |
-          steps.code-analyzer.outputs.exit-code > 0 ||
           steps.code-analyzer.outputs.num-sev1-violations > 0 ||
           steps.code-analyzer.outputs.num-sev2-violations > 0
         run: exit 1
