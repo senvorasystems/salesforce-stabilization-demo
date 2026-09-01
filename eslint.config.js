@@ -28,7 +28,7 @@ module.exports = defineConfig([
     languageOptions: {
       globals: {
         ...globals.node,
-        ...jestPlugin.environments.globals.globals
+        ...globals.jest
       }
     }
   },
